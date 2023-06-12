@@ -15,7 +15,9 @@ namespace MeterFactoryDemo
         {
             _meterFactory = meterFactory;
             _meter = _meterFactory.Create("MeterFactoryDemo.Http");
-            _serverRequestDuration = _meter.CreateHistogram<double>("demo-http-server-request-duration");
+            _serverRequestDuration = _meter.CreateHistogram<double>(
+                "demo-http-server-request-duration",
+                unit: "ms");
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -45,7 +47,10 @@ namespace MeterFactoryDemo
                 }
             }
 
-            _serverRequestDuration.Record(measurement / 1000d, tagList);
+            // Convert seconds to milliseconds.
+            var milliseconds = measurement / 1000d;
+
+            _serverRequestDuration.Record(milliseconds, tagList);
         }
 
         private void MeterPublished(Instrument instrument, MeterListener listener)
