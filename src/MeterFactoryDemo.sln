@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.33711.374
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MeterFactoryDemo", "MeterFactoryDemo\MeterFactoryDemo.csproj", "{B6DE0408-8044-4886-A1FC-61D1F84B078D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MeterFactoryDemo.Tests", "MeterFactoryDemo.Tests\MeterFactoryDemo.Tests.csproj", "{B2C5FDDF-1F11-4BCB-B267-9F663FD13E67}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B6DE0408-8044-4886-A1FC-61D1F84B078D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6DE0408-8044-4886-A1FC-61D1F84B078D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6DE0408-8044-4886-A1FC-61D1F84B078D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6DE0408-8044-4886-A1FC-61D1F84B078D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2C5FDDF-1F11-4BCB-B267-9F663FD13E67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2C5FDDF-1F11-4BCB-B267-9F663FD13E67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2C5FDDF-1F11-4BCB-B267-9F663FD13E67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2C5FDDF-1F11-4BCB-B267-9F663FD13E67}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7B1CBA31-2BD6-4B36-8678-31D370EFEC6A}
+	EndGlobalSection
+EndGlobal
