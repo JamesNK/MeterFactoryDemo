@@ -14,6 +14,8 @@ namespace MeterFactoryDemo
         public HttpServerMetricsPublisher(IMeterFactory meterFactory)
         {
             _meterFactory = meterFactory;
+
+            // Create the new meter and counter.
             _meter = _meterFactory.Create("MeterFactoryDemo.Http");
             _serverRequestDuration = _meter.CreateHistogram<double>(
                 "demo-http-server-request-duration",
@@ -22,8 +24,17 @@ namespace MeterFactoryDemo
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
+            // Listen to the built-in ASP.NET Core counter.
             _meterListener = new MeterListener();
-            _meterListener.InstrumentPublished = MeterPublished;
+            _meterListener.InstrumentPublished = (instrument, listener) =>
+            {
+                if (instrument.Meter.Scope == _meterFactory &&
+                    instrument.Meter.Name == "Microsoft.AspNetCore.Hosting" &&
+                    instrument.Name == "request-duration")
+                {
+                    listener.EnableMeasurementEvents(instrument);
+                }
+            };
             _meterListener.SetMeasurementEventCallback<double>(OnMeasurementRecorded);
             _meterListener.Start();
 
@@ -32,6 +43,7 @@ namespace MeterFactoryDemo
 
         private void OnMeasurementRecorded(Instrument instrument, double measurement, ReadOnlySpan<KeyValuePair<string, object?>> tags, object? state)
         {
+            // Modify the recorded built-in measurement value and republish to the new counter.
             var tagList = new TagList();
             foreach (var tag in tags)
             {
@@ -51,16 +63,6 @@ namespace MeterFactoryDemo
             var milliseconds = measurement / 1000d;
 
             _serverRequestDuration.Record(milliseconds, tagList);
-        }
-
-        private void MeterPublished(Instrument instrument, MeterListener listener)
-        {
-            if (instrument.Meter.Scope == _meterFactory &&
-                instrument.Meter.Name == "Microsoft.AspNetCore.Hosting" &&
-                instrument.Name == "request-duration")
-            {
-                listener.EnableMeasurementEvents(instrument);
-            }
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
