@@ -6,6 +6,7 @@ using System.Diagnostics.Metrics;
 
 namespace MeterFactoryDemo.Microbenchmarks
 {
+    [MemoryDiagnoser]
     public class BuiltInBenchmark
     {
         private readonly Meter _meter;

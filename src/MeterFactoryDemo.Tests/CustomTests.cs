@@ -27,7 +27,7 @@ namespace MeterFactoryDemo.Tests
             Assert.Collection(instrumentRecorder.GetMeasurements(),
                 measurement =>
                 {
-                    Assert.Equal(200, (int)measurement.Tags.ToArray().Single(t => t.Key == "status-code").Value);
+                    Assert.Equal(200, (int)measurement.Tags.ToArray().Single(t => t.Key == "my-cool-status-code").Value);
                 });
         }
     }

@@ -1,13 +1,16 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.Metrics;
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 
 namespace MeterFactoryDemo.Microbenchmarks
 {
+    [MemoryDiagnoser]
     public class PublisherBenchmark
     {
+        private readonly IMeterFactory _meterFactory;
         private readonly Meter _meter;
         private readonly Histogram<double> _requestDuration;
         private Measurement<double> _counterValue;
@@ -21,13 +24,10 @@ namespace MeterFactoryDemo.Microbenchmarks
             var services = new ServiceCollection();
             services.AddMetrics();
             var serviceProvider = services.BuildServiceProvider();
-            var meterFactory = serviceProvider.GetRequiredService<IMeterFactory>();
+            _meterFactory = serviceProvider.GetRequiredService<IMeterFactory>();
 
-            _meter = meterFactory.Create("Microsoft.AspNetCore.Hosting");
+            _meter = _meterFactory.Create("Microsoft.AspNetCore.Hosting");
             _requestDuration = _meter.CreateHistogram<double>("request-duration", "s");
-
-            var publisher = new HttpServerMetricsPublisher(meterFactory);
-            publisher.StartAsync(CancellationToken.None).GetAwaiter().GetResult();
 
             var meterListener = new MeterListener();
             meterListener.InstrumentPublished = (instrument, listener) =>
@@ -47,10 +47,21 @@ namespace MeterFactoryDemo.Microbenchmarks
         [GlobalSetup]
         public void GlobalSetup()
         {
+            var options = new HttpServerMetricsPublisherOptions();
+
             for (int i = 0; i < TagCount; i++)
             {
-                _tags.Add(new KeyValuePair<string, object?>($"Key{i}", $"Value{i}"));
+                var key = $"Key{i}";
+                _tags.Add(new KeyValuePair<string, object?>(key, $"Value{i}"));
+
+                if (i % 2 == 0)
+                {
+                    options.Mapping.Add(key, $"mapped-{key}");
+                }
             }
+
+            var publisher = new HttpServerMetricsPublisher(_meterFactory, Options.Create(options));
+            publisher.StartAsync(CancellationToken.None).GetAwaiter().GetResult();
         }
 
         [Benchmark]

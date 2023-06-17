@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Diagnostics.Metrics;
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 
@@ -7,13 +8,15 @@ namespace MeterFactoryDemo
     public class HttpServerMetricsPublisher : IHostedService
     {
         private readonly IMeterFactory _meterFactory;
+        private readonly HttpServerMetricsPublisherOptions _options;
         private readonly Meter _meter;
         private readonly Histogram<double> _serverRequestDuration;
         private MeterListener? _meterListener;
 
-        public HttpServerMetricsPublisher(IMeterFactory meterFactory)
+        public HttpServerMetricsPublisher(IMeterFactory meterFactory, IOptions<HttpServerMetricsPublisherOptions> options)
         {
             _meterFactory = meterFactory;
+            _options = options.Value;
 
             // Create the new meter and counter.
             _meter = _meterFactory.Create("MeterFactoryDemo.Http");
@@ -47,9 +50,10 @@ namespace MeterFactoryDemo
             var tagList = new TagList();
             for (int i = 0; i < tags.Length; i++)
             {
-                if (i % 2 == 0)
+                var tag = tags[i];
+                if (_options.Mapping.TryGetValue(tag.Key, out var newKey))
                 {
-                    tagList.Add(tags[i]);
+                    tagList.Add(new KeyValuePair<string, object?>(newKey, tag.Value));
                 }
             }
 
