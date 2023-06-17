@@ -45,17 +45,11 @@ namespace MeterFactoryDemo
         {
             // Modify the recorded built-in measurement value and republish to the new counter.
             var tagList = new TagList();
-            foreach (var tag in tags)
+            for (int i = 0; i < tags.Length; i++)
             {
-                switch (tag.Key)
+                if (i % 2 == 0)
                 {
-                    case "scheme":
-                    case "protocol":
-                        // ignore
-                        break;
-                    default:
-                        tagList.Add(tag);
-                        break;
+                    tagList.Add(tags[i]);
                 }
             }
 

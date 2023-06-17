@@ -3,10 +3,12 @@ using BenchmarkDotNet.Running;
 using MeterFactoryDemo.Microbenchmarks;
 
 //var counterBenchmark = new PublisherBenchmark();
+//counterBenchmark.TagCount = 20;
+//counterBenchmark.GlobalSetup();
 
 //for (int i = 0; i < 1000 * 1000 * 1000; i++)
 //{
-//    counterBenchmark.ReceiveDirectly();
+//    counterBenchmark.RecordDuration();
 //}
 
 var config = ManualConfig.Create(DefaultConfig.Instance).WithOptions(ConfigOptions.JoinSummary);

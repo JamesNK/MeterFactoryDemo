@@ -3,8 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.Metrics;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
-using System.Security.Cryptography;
-using System.Threading.Tasks.Sources;
 
 namespace MeterFactoryDemo.Microbenchmarks
 {
@@ -12,8 +10,11 @@ namespace MeterFactoryDemo.Microbenchmarks
     {
         private readonly Meter _meter;
         private readonly Histogram<double> _requestDuration;
-        private readonly object _statusCode = 200;
         private Measurement<double> _counterValue;
+        private List<KeyValuePair<string, object?>> _tags = new List<KeyValuePair<string, object?>>();
+
+        [Params(0, 3, 15)]
+        public int TagCount { get; set; }
 
         public BuiltInBenchmark()
         {
@@ -40,18 +41,26 @@ namespace MeterFactoryDemo.Microbenchmarks
             meterListener.Start();
         }
 
+        [GlobalSetup]
+        public void GlobalSetup()
+        {
+            for (int i = 0; i < TagCount; i++)
+            {
+                _tags.Add(new KeyValuePair<string, object?>($"Key{i}", $"Value{i}"));
+            }
+        }
+
         [Benchmark]
         public void RecordDuration()
         {
+            var tags = new TagList();
+            for (int i = 0; i < _tags.Count; i++)
+            {
+                tags.Add(_tags[i]);
+            }
+
             _counterValue = default;
-            _requestDuration.Record(
-                0.5,
-                new TagList
-                {
-                    new KeyValuePair<string, object?>("status-code", _statusCode),
-                    new KeyValuePair<string, object?>("protocol", "HTTP/1.1"),
-                    new KeyValuePair<string, object?>("route", "api/product/{id}"),
-                });
+            _requestDuration.Record(0.5, tags);
 
             if (_counterValue.Value == 0)
             {
