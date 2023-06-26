@@ -7,4 +7,8 @@
 	<PreserveCompilationContext>true</PreserveCompilationContext>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AspNetCoreEnricher\AspNetCoreEnricher.csproj" />
+  </ItemGroup>
+
 </Project>

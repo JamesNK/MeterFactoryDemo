@@ -30,9 +30,14 @@ namespace MeterFactoryDemo.Tests
             Assert.Collection(instrumentRecorder.GetMeasurements(),
                 measurement =>
                 {
+                    // Built-in
                     Assert.Equal("http", measurement.Tags.ToArray().Single(t => t.Key == "scheme").Value);
                     Assert.Equal("GET", measurement.Tags.ToArray().Single(t => t.Key == "method").Value);
                     Assert.Equal("/", measurement.Tags.ToArray().Single(t => t.Key == "route").Value);
+
+                    // From enrichers
+                    Assert.Equal("Value!", measurement.Tags.ToArray().Single(t => t.Key == "TagName1").Value);
+                    Assert.Equal("Value!", measurement.Tags.ToArray().Single(t => t.Key == "TagName2").Value);
                 });
         }
 
