@@ -1,7 +1,6 @@
 ﻿using HttpClientEnricher.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Http;
 
 namespace HttpClientEnricher
 {
@@ -9,12 +8,18 @@ namespace HttpClientEnricher
     {
         public static IServiceCollection AddEnricher<TEnricher>(this IServiceCollection services) where TEnricher : class, IEnricher
         {
-            // Register startup filter that adds middleware when an enricher is added.
-            // It's ok if this is called multiple times, TryAdd ensures it is only added once.
-            services.TryAddEnumerable(ServiceDescriptor.Transient<IHttpMessageHandlerBuilderFilter, EnricherStartupFilter>());
             // Register enricher type.
-            services.TryAddEnumerable(ServiceDescriptor.Transient<IEnricher, TEnricher>());
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IEnricher, TEnricher>());
             return services;
+        }
+    }
+
+    public static class HttpClientBuilderEnricherExtensions
+    {
+        public static IHttpClientBuilder AddHttpEnrichment(this IHttpClientBuilder builder)
+        {
+            builder.AddHttpMessageHandler<EnricherMessageHandler>();
+            return builder;
         }
     }
 }

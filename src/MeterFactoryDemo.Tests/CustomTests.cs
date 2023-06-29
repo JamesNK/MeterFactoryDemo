@@ -24,6 +24,8 @@ namespace MeterFactoryDemo.Tests
             // Assert
             Assert.Equal("Hello World!", await response.Content.ReadAsStringAsync());
 
+            await Task.Delay(100); // TODO: Replace with MetricsCollection.WaitForMeasurements
+
             Assert.Collection(instrumentRecorder.GetMeasurements(),
                 measurement =>
                 {

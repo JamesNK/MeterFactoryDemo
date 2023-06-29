@@ -4,9 +4,9 @@
     {
         private readonly List<IEnricher> _enrichers;
 
-        public EnricherMessageHandler(List<IEnricher> enrichers)
+        public EnricherMessageHandler(IEnumerable<IEnricher> enrichers)
         {
-            _enrichers = enrichers;
+            _enrichers = enrichers.ToList();
         }
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)

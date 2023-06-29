@@ -24,6 +24,8 @@ namespace MeterFactoryDemo.Tests
             // Assert
             Assert.Equal("Hello World!", await response.Content.ReadAsStringAsync());
 
+            await Task.Delay(100); // TODO: Replace with MetricsCollection.WaitForMeasurements
+
             // This is currently flaky. Counter value is added once response is complete.
             // There is a race between the client reading the response + assert and the counter.
             // Need InstrumentRecorder.WaitForMeasurementsAsync API to make this test work reliably.
