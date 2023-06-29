@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.Metrics;
-using System.Diagnostics.Metrics;
+using Microsoft.Extensions.Telemetry.Testing.Metering;
 
 namespace MeterFactoryDemo.Tests
 {
@@ -15,7 +15,7 @@ namespace MeterFactoryDemo.Tests
         {
             // Arrange
             var meterFactory = _factory.Services.GetRequiredService<IMeterFactory>();
-            var instrumentRecorder = new InstrumentRecorder<double>(meterFactory, "MeterFactoryDemo.Http", "demo-http-server-request-duration");
+            var collector = new MetricCollector<double>(meterFactory, "MeterFactoryDemo.Http", "demo-http-server-request-duration");
             var client = _factory.CreateClient();
 
             // Act
@@ -24,12 +24,11 @@ namespace MeterFactoryDemo.Tests
             // Assert
             Assert.Equal("Hello World!", await response.Content.ReadAsStringAsync());
 
-            await Task.Delay(100); // TODO: Replace with MetricsCollection.WaitForMeasurements
-
-            Assert.Collection(instrumentRecorder.GetMeasurements(),
+            await collector.WaitForMeasurementsAsync(minCount: 1);
+            Assert.Collection(collector.GetMeasurementSnapshot(),
                 measurement =>
                 {
-                    Assert.Equal(200, (int)measurement.Tags.ToArray().Single(t => t.Key == "my-cool-status-code").Value);
+                    Assert.Equal(200, (int)measurement.Tags["my-cool-status-code"]!);
                 });
         }
     }

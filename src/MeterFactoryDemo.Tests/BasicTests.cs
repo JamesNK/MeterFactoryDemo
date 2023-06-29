@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.Metrics;
+using Microsoft.Extensions.Telemetry.Testing.Metering;
 using System.Diagnostics.Metrics;
 
 namespace MeterFactoryDemo.Tests
@@ -15,7 +16,7 @@ namespace MeterFactoryDemo.Tests
         {
             // Arrange
             var meterFactory = _factory.Services.GetRequiredService<IMeterFactory>();
-            var instrumentRecorder = new InstrumentRecorder<double>(meterFactory, "Microsoft.AspNetCore.Hosting", "request-duration");
+            var collector = new MetricCollector<double>(meterFactory, "Microsoft.AspNetCore.Hosting", "request-duration");
             var client = _factory.CreateClient();
 
             // Act
@@ -24,22 +25,18 @@ namespace MeterFactoryDemo.Tests
             // Assert
             Assert.Equal("Hello World!", await response.Content.ReadAsStringAsync());
 
-            await Task.Delay(100); // TODO: Replace with MetricsCollection.WaitForMeasurements
-
-            // This is currently flaky. Counter value is added once response is complete.
-            // There is a race between the client reading the response + assert and the counter.
-            // Need InstrumentRecorder.WaitForMeasurementsAsync API to make this test work reliably.
-            Assert.Collection(instrumentRecorder.GetMeasurements(),
+            await collector.WaitForMeasurementsAsync(minCount: 1);
+            Assert.Collection(collector.GetMeasurementSnapshot(),
                 measurement =>
                 {
                     // Built-in
-                    Assert.Equal("http", measurement.Tags.ToArray().Single(t => t.Key == "scheme").Value);
-                    Assert.Equal("GET", measurement.Tags.ToArray().Single(t => t.Key == "method").Value);
-                    Assert.Equal("/", measurement.Tags.ToArray().Single(t => t.Key == "route").Value);
+                    Assert.Equal("http", measurement.Tags["scheme"]);
+                    Assert.Equal("GET", measurement.Tags["method"]);
+                    Assert.Equal("/", measurement.Tags["route"]);
 
                     // From enrichers
-                    Assert.Equal("Value!", measurement.Tags.ToArray().Single(t => t.Key == "TagName1").Value);
-                    Assert.Equal("Value!", measurement.Tags.ToArray().Single(t => t.Key == "TagName2").Value);
+                    Assert.Equal("Value!", measurement.Tags["TagName1"]);
+                    Assert.Equal("Value!", measurement.Tags["TagName2"]);
                 });
         }
 
