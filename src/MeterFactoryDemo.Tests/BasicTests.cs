@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.Metrics;
 using Microsoft.Extensions.Telemetry.Testing.Metering;
 using System.Diagnostics.Metrics;
+using System.Net;
 
 namespace MeterFactoryDemo.Tests
 {
@@ -16,7 +17,7 @@ namespace MeterFactoryDemo.Tests
         {
             // Arrange
             var meterFactory = _factory.Services.GetRequiredService<IMeterFactory>();
-            var collector = new MetricCollector<double>(meterFactory, "Microsoft.AspNetCore.Hosting", "request-duration");
+            var collector = new MetricCollector<double>(meterFactory, "Microsoft.AspNetCore.Hosting", "http-server-request-duration");
             var client = _factory.CreateClient();
 
             // Act
@@ -41,6 +42,29 @@ namespace MeterFactoryDemo.Tests
         }
 
         [Fact]
+        public async Task Get_ThrowError()
+        {
+            // Arrange
+            var meterFactory = _factory.Services.GetRequiredService<IMeterFactory>();
+            var collector = new MetricCollector<double>(meterFactory, "Microsoft.AspNetCore.Hosting", "http-server-request-duration");
+            var client = _factory.CreateClient();
+
+            // Act
+            var response = await client.GetAsync("/error");
+
+            // Assert
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
+
+            await collector.WaitForMeasurementsAsync(minCount: 1);
+            Assert.Collection(collector.GetMeasurementSnapshot(),
+                measurement =>
+                {
+                    // From enrichers
+                    Assert.Equal("Exception!", measurement.Tags["ExceptionMessage"]);
+                });
+        }
+
+        [Fact]
         public async Task Get_MeterListener_RequestCounterIncreased()
         {
             // Arrange
@@ -52,7 +76,7 @@ namespace MeterFactoryDemo.Tests
             {
                 if (instrument.Meter.Scope == meterFactory &&
                     instrument.Meter.Name == "Microsoft.AspNetCore.Hosting" &&
-                    instrument.Name == "request-duration")
+                    instrument.Name == "http-server-request-duration")
                 {
                     listener.EnableMeasurementEvents(instrument);
                 }

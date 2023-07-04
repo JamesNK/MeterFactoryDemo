@@ -6,7 +6,11 @@ public class Program
 {
     private static void Main(string[] args)
     {
-        var builder = WebApplication.CreateBuilder(args);
+        var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+        {
+            Args = args,
+            EnvironmentName = "Test"
+        });
         builder.Services.AddEnricher<DemoEnricher1>();
         builder.Services.AddEnricher<DemoEnricher2>();
         builder.Services.AddSingleton<IHostedService, HttpServerMetricsPublisher>();
@@ -17,6 +21,10 @@ public class Program
         var app = builder.Build();
 
         app.MapGet("/", () => "Hello World!");
+        app.MapGet("/error", (HttpContext context) =>
+        {
+            throw new Exception("Exception!");
+        });
 
         app.Run();
     }

@@ -33,7 +33,7 @@ namespace MeterFactoryDemo
             {
                 if (instrument.Meter.Scope == _meterFactory &&
                     instrument.Meter.Name == "Microsoft.AspNetCore.Hosting" &&
-                    instrument.Name == "request-duration")
+                    instrument.Name == "http-server-request-duration")
                 {
                     listener.EnableMeasurementEvents(instrument);
                 }
