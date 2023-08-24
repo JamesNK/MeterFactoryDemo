@@ -1,4 +1,5 @@
 using AspNetCoreEnricher;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace MeterFactoryDemo;
 
@@ -20,7 +21,13 @@ public class Program
         });
         var app = builder.Build();
 
-        app.MapGet("/", () => "Hello World!");
+        app.MapGet("/", (HttpContext context) =>
+        {
+            context.Features.Get<IHttpMetricsTagsFeature>()?.Tags
+                .Add(new KeyValuePair<string, object?>("custom-tag", "value!"));
+
+            return "Hello World!";
+        });
         app.MapGet("/error", (HttpContext context) =>
         {
             throw new Exception("Exception!");
